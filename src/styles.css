@@ -133,6 +133,20 @@ label {
   text-transform: uppercase;
 }
 
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--acid);
+}
+
 select,
 button {
   width: 100%;

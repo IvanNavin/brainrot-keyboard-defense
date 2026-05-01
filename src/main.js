@@ -7,6 +7,7 @@ const menuResult = document.querySelector("#menuResult");
 const startButton = document.querySelector("#start");
 const modeSelect = document.querySelector("#mode");
 const difficultySelect = document.querySelector("#difficulty");
+const targetHighlightInput = document.querySelector("#targetHighlight");
 
 const STORAGE_KEY = "brainrot-keyboard-defense.stats.v1";
 const KEY_IDS = "qwertyuiopasdfghjklzxcvbnm".split("");
@@ -59,6 +60,7 @@ const state = {
   screen: "menu",
   mode: "classic",
   difficulty: "normal",
+  highlightTarget: false,
   score: 0,
   hp: 3,
   streak: 0,
@@ -68,6 +70,8 @@ const state = {
   keys: [],
   inputQueue: [],
   particles: [],
+  shots: [],
+  fragments: [],
   pressed: new Map(),
   stats: loadStats(),
   assets: {
@@ -148,6 +152,7 @@ function startGame() {
   state.screen = "playing";
   state.mode = modeSelect.value;
   state.difficulty = difficultySelect.value;
+  state.highlightTarget = targetHighlightInput.checked;
   state.score = 0;
   state.hp = 3;
   state.streak = 0;
@@ -156,6 +161,8 @@ function startGame() {
   state.active = null;
   state.inputQueue = [];
   state.particles = [];
+  state.shots = [];
+  state.fragments = [];
   state.pressed.clear();
   menuTitle.textContent = "Brainrot Keyboard Defense";
   menuResult.classList.add("is-hidden");
@@ -252,6 +259,7 @@ function processInput() {
       .sort((a, b) => b.y - a.y)[0];
 
     state.pressed.set(key, 120);
+    fireShot(key, target);
     if (!target) continue;
 
     state.stats[key].hits += 1;
@@ -268,7 +276,8 @@ function processInput() {
       return;
     }
 
-    burst(target.x, target.y, "#b7ff37", 16);
+    shatterBrainrot(target);
+    burst(target.x, target.y, "#b7ff37", 22);
     state.active.status = "hit";
     state.active = null;
     spawnBrainrot();
@@ -314,6 +323,21 @@ function update(delta) {
       life: particle.life - delta,
     }))
     .filter((particle) => particle.life > 0);
+
+  state.shots = state.shots
+    .map((shot) => ({ ...shot, life: shot.life - delta }))
+    .filter((shot) => shot.life > 0);
+
+  state.fragments = state.fragments
+    .map((fragment) => ({
+      ...fragment,
+      x: fragment.x + fragment.vx * delta,
+      y: fragment.y + fragment.vy * delta,
+      vy: fragment.vy + 360 * delta,
+      rotation: fragment.rotation + fragment.spin * delta,
+      life: fragment.life - delta,
+    }))
+    .filter((fragment) => fragment.life > 0);
 }
 
 function draw() {
@@ -323,7 +347,9 @@ function draw() {
   drawArena(width, height);
   drawHud();
   drawKeyboard();
+  drawShots();
   drawBrainrot();
+  drawFragments();
   drawParticles();
   drawStatusOverlay();
 }
@@ -402,8 +428,8 @@ function drawBrainrot() {
         .slice(brainrot.progress)
         .toUpperCase()}`;
 
-  ctx.strokeText(label, brainrot.x, drawY - 12);
-  ctx.fillText(label, brainrot.x, drawY - 12);
+  ctx.strokeText(label, brainrot.x, drawY + brainrot.size + 12);
+  ctx.fillText(label, brainrot.x, drawY + brainrot.size + 12);
   ctx.restore();
 }
 
@@ -417,7 +443,7 @@ function drawKeyboard() {
     const stat = state.stats[key.id];
     const guide = FINGER_GUIDES[key.id];
     const heat = Math.min(1, stat.misses / Math.max(4, stat.hits + stat.misses));
-    const isTarget = state.active?.key === key.id;
+    const isTarget = state.highlightTarget && state.active?.key === key.id;
     const isPressed = state.pressed.has(key.id);
 
     ctx.fillStyle = isPressed
@@ -440,6 +466,63 @@ function drawKeyboard() {
     ctx.fillText(guide.finger, key.x + key.width / 2, key.y + key.height - 9);
   }
 
+  ctx.restore();
+}
+
+function drawShots() {
+  ctx.save();
+  ctx.lineCap = "round";
+
+  for (const shot of state.shots) {
+    const progress = 1 - shot.life / shot.maxLife;
+    const alpha = Math.max(0, shot.life / shot.maxLife);
+    const headX = shot.x1 + (shot.x2 - shot.x1) * Math.min(1, progress * 1.25);
+    const headY = shot.y1 + (shot.y2 - shot.y1) * Math.min(1, progress * 1.25);
+    const tailX = shot.x1 + (shot.x2 - shot.x1) * Math.max(0, progress * 1.25 - 0.22);
+    const tailY = shot.y1 + (shot.y2 - shot.y1) * Math.max(0, progress * 1.25 - 0.22);
+
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = shot.hit ? "#b7ff37" : "#ff4d4d";
+    ctx.lineWidth = shot.hit ? 4 : 3;
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.moveTo(tailX, tailY);
+    ctx.lineTo(headX, headY);
+    ctx.stroke();
+
+    ctx.fillStyle = "#f7f3df";
+    ctx.beginPath();
+    ctx.arc(headX, headY, shot.hit ? 4 : 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawFragments() {
+  if (!state.assets.ready) return;
+
+  ctx.save();
+  for (const fragment of state.fragments) {
+    const alpha = Math.max(0, fragment.life / fragment.maxLife);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(fragment.x, fragment.y);
+    ctx.rotate(fragment.rotation);
+    ctx.drawImage(
+      state.assets.image,
+      fragment.sx,
+      fragment.sy,
+      fragment.sw,
+      fragment.sh,
+      -fragment.size / 2,
+      -fragment.size / 2,
+      fragment.size,
+      fragment.size,
+    );
+    ctx.restore();
+  }
   ctx.restore();
 }
 
@@ -526,6 +609,55 @@ function burst(x, y, color, count) {
       life: 0.28 + Math.random() * 0.36,
       maxLife: 0.64,
     });
+  }
+}
+
+function fireShot(keyId, target) {
+  const key = getKey(keyId);
+  if (!key) return;
+
+  const originX = key.x + key.width / 2;
+  const originY = key.y + 6;
+  const missDrift = keyId.charCodeAt(0) % 2 === 0 ? -72 : 72;
+  const destinationX = target ? target.x : (state.active?.x || originX) + missDrift;
+  const destinationY = target ? target.y : Math.max(54, (state.active?.y || originY - 240) - 60);
+
+  state.shots.push({
+    x1: originX,
+    y1: originY,
+    x2: destinationX,
+    y2: destinationY,
+    hit: Boolean(target),
+    life: 0.22,
+    maxLife: 0.22,
+  });
+}
+
+function shatterBrainrot(brainrot) {
+  const cols = 3;
+  const rows = 3;
+  const pieceSize = brainrot.size / cols;
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const angle = Math.atan2(row - 1, col - 1) + (Math.random() - 0.5) * 0.9;
+      const force = 95 + Math.random() * 210;
+      state.fragments.push({
+        sx: brainrot.frame.x + (brainrot.frame.w / cols) * col,
+        sy: brainrot.frame.y + (brainrot.frame.h / rows) * row,
+        sw: brainrot.frame.w / cols,
+        sh: brainrot.frame.h / rows,
+        x: brainrot.x + (col - 1) * pieceSize * 0.45,
+        y: brainrot.y + (row - 1) * pieceSize * 0.45,
+        vx: Math.cos(angle) * force,
+        vy: Math.sin(angle) * force - 80,
+        rotation: Math.random() * Math.PI,
+        spin: -8 + Math.random() * 16,
+        size: pieceSize,
+        life: 0.62,
+        maxLife: 0.62,
+      });
+    }
   }
 }
 
