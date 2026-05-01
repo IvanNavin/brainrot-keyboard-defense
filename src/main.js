@@ -54,9 +54,9 @@ function saveStats() {
 }
 
 async function loadAssets() {
-  const [atlas] = await Promise.all([fetch("./assets/brainrots/spritesheet.json").then((res) => res.json())]);
+  const [atlas] = await Promise.all([fetch("./assets/brainrots/spritesheet-runtime.json").then((res) => res.json())]);
   const image = new Image();
-  image.src = "./assets/brainrots/spritesheet.png";
+  image.src = "./assets/brainrots/spritesheet-runtime.png";
   await image.decode();
 
   state.assets.image = image;
@@ -438,7 +438,7 @@ startButton.addEventListener("click", startGame);
 resize();
 loadAssets()
   .catch((error) => {
-    console.error(error);
+    console.error("Brainrot atlas failed to load", error);
   })
   .finally(() => {
     if (state.assets.ready) {
