@@ -50,6 +50,19 @@ body::before {
   height: 100%;
 }
 
+.menu-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(8, 11, 9, 0.26);
+  backdrop-filter: blur(10px);
+  transition: opacity 180ms ease;
+}
+
+.menu-backdrop.is-hidden {
+  opacity: 0;
+}
+
 .menu {
   position: absolute;
   left: 50%;
@@ -61,14 +74,14 @@ body::before {
   background: var(--panel);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
   transform: translate(-50%, -50%);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 
 .menu.is-hidden {
   pointer-events: none;
   opacity: 0;
   transform: translate(-50%, -48%) scale(0.98);
-  transition: opacity 180ms ease, transform 180ms ease;
 }
 
 .brand {

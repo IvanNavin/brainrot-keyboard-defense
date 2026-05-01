@@ -1,6 +1,7 @@
 const canvas = document.querySelector("#game");
 const ctx = canvas.getContext("2d");
 const menu = document.querySelector("#menu");
+const menuBackdrop = document.querySelector("#menuBackdrop");
 const startButton = document.querySelector("#start");
 const modeSelect = document.querySelector("#mode");
 const difficultySelect = document.querySelector("#difficulty");
@@ -79,13 +80,15 @@ function buildKeyboard(width, height) {
   const keyWidth = Math.min(58, Math.max(30, (width - 48) / 11.2));
   const gap = Math.max(5, keyWidth * 0.13);
   const keyHeight = keyWidth * 0.82;
+  const step = keyWidth + gap;
+  const topRowWidth = rows[0].length * keyWidth + (rows[0].length - 1) * gap;
+  const baseX = (width - topRowWidth) / 2;
+  const rowOffsets = [0, step * 0.5, step];
   const startY = height - keyHeight * 3 - gap * 2 - 42;
 
   return rows.flatMap((row, rowIndex) => {
-    const rowWidth = row.length * keyWidth + (row.length - 1) * gap;
     const y = startY + rowIndex * (keyHeight + gap);
-    const offset = rowIndex === 1 ? keyWidth * 0.48 : rowIndex === 2 ? keyWidth * 1.25 : 0;
-    const startX = (width - rowWidth) / 2 + offset;
+    const startX = baseX + rowOffsets[rowIndex];
 
     return row.split("").map((id, index) => ({
       id,
@@ -113,6 +116,7 @@ function startGame() {
   state.particles = [];
   state.pressed.clear();
   menu.classList.add("is-hidden");
+  menuBackdrop.classList.add("is-hidden");
   spawnBrainrot();
 }
 
@@ -120,6 +124,7 @@ function endGame() {
   state.screen = "gameover";
   state.active = null;
   menu.classList.remove("is-hidden");
+  menuBackdrop.classList.remove("is-hidden");
   startButton.textContent = "Restart defense";
 }
 
@@ -258,9 +263,9 @@ function draw() {
   ctx.clearRect(0, 0, width, height);
   drawArena(width, height);
   drawHud();
+  drawKeyboard();
   drawBrainrot();
   drawParticles();
-  drawKeyboard();
 }
 
 function drawArena(width, height) {
