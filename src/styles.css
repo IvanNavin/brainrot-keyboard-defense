@@ -115,6 +115,11 @@ h1 {
   text-transform: uppercase;
 }
 
+.menu-result.is-record {
+  color: var(--acid);
+  text-shadow: 0 0 22px rgba(183, 255, 55, 0.42);
+}
+
 .menu-result.is-hidden {
   display: none;
 }

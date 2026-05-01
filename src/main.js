@@ -5,45 +5,33 @@ const menuBackdrop = document.querySelector("#menuBackdrop");
 const menuTitle = document.querySelector("#menuTitle");
 const menuResult = document.querySelector("#menuResult");
 const startButton = document.querySelector("#start");
+const languageSelect = document.querySelector("#language");
 const modeSelect = document.querySelector("#mode");
 const difficultySelect = document.querySelector("#difficulty");
 const targetHighlightInput = document.querySelector("#targetHighlight");
 
 const STORAGE_KEY = "brainrot-keyboard-defense.stats.v1";
-const KEY_IDS = "qwertyuiopasdfghjklzxcvbnm".split("");
-const WORDS = ["cat", "run", "dev", "type", "code", "data", "game", "stack", "debug", "pixel"];
+const BEST_SCORE_KEY = "brainrot-keyboard-defense.best-score.v1";
+const LAYOUTS = {
+  en: {
+    rows: ["qwertyuiop", "asdfghjkl", "zxcvbnm"],
+    words: ["cat", "run", "dev", "type", "code", "data", "game", "stack", "debug", "pixel"],
+  },
+  uk: {
+    rows: ["йцукенгшщзхї", "фівапролджє", "ячсмитьбю"],
+    words: ["кіт", "дім", "код", "гра", "мова", "тип", "дані", "ліс", "сон", "друк"],
+  },
+};
+const ALL_KEY_IDS = [...new Set(Object.values(LAYOUTS).flatMap((layout) => layout.rows.flatMap((row) => row.split(""))))];
+const PHYSICAL_ROWS = [
+  ["KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyU", "KeyI", "KeyO", "KeyP", "BracketLeft", "BracketRight"],
+  ["KeyA", "KeyS", "KeyD", "KeyF", "KeyG", "KeyH", "KeyJ", "KeyK", "KeyL", "Semicolon", "Quote"],
+  ["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM", "Comma", "Period"],
+];
 const DIFFICULTY = {
   easy: { baseSpeed: 135, speedStep: 13 },
   normal: { baseSpeed: 175, speedStep: 18 },
   hard: { baseSpeed: 230, speedStep: 25 },
-};
-const FINGER_GUIDES = {
-  q: { finger: "LP", color: "#ff6b6b" },
-  a: { finger: "LP", color: "#ff6b6b" },
-  z: { finger: "LP", color: "#ff6b6b" },
-  w: { finger: "LR", color: "#ffb13d" },
-  s: { finger: "LR", color: "#ffb13d" },
-  x: { finger: "LR", color: "#ffb13d" },
-  e: { finger: "LM", color: "#f8e55b" },
-  d: { finger: "LM", color: "#f8e55b" },
-  c: { finger: "LM", color: "#f8e55b" },
-  r: { finger: "LI", color: "#75df72" },
-  f: { finger: "LI", color: "#75df72" },
-  v: { finger: "LI", color: "#75df72" },
-  t: { finger: "LI", color: "#75df72" },
-  g: { finger: "LI", color: "#75df72" },
-  b: { finger: "LI", color: "#75df72" },
-  y: { finger: "RI", color: "#4ecdc4" },
-  h: { finger: "RI", color: "#4ecdc4" },
-  n: { finger: "RI", color: "#4ecdc4" },
-  u: { finger: "RI", color: "#4ecdc4" },
-  j: { finger: "RI", color: "#4ecdc4" },
-  m: { finger: "RI", color: "#4ecdc4" },
-  i: { finger: "RM", color: "#5aa9ff" },
-  k: { finger: "RM", color: "#5aa9ff" },
-  o: { finger: "RR", color: "#b786ff" },
-  l: { finger: "RR", color: "#b786ff" },
-  p: { finger: "RP", color: "#ff7ad9" },
 };
 const FINGER_LEGEND = [
   ["LP", "left pinky", "#ff6b6b"],
@@ -58,10 +46,13 @@ const FINGER_LEGEND = [
 
 const state = {
   screen: "menu",
+  language: "en",
   mode: "classic",
   difficulty: "normal",
   highlightTarget: false,
   score: 0,
+  bestScore: loadBestScore(),
+  isNewBest: false,
   hp: 3,
   streak: 0,
   totalHits: 0,
@@ -83,20 +74,76 @@ const state = {
 };
 
 function loadStats() {
-  const fallback = Object.fromEntries(KEY_IDS.map((key) => [key, { hits: 0, misses: 0 }]));
-
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    return Object.fromEntries(
-      KEY_IDS.map((key) => [key, { hits: parsed[key]?.hits || 0, misses: parsed[key]?.misses || 0 }]),
-    );
+    return Object.fromEntries(ALL_KEY_IDS.map((key) => [key, normalizeStat(parsed[key])]));
   } catch {
-    return fallback;
+    return Object.fromEntries(ALL_KEY_IDS.map((key) => [key, { hits: 0, misses: 0 }]));
   }
 }
 
 function saveStats() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.stats));
+}
+
+function loadBestScore() {
+  return Number.parseInt(localStorage.getItem(BEST_SCORE_KEY) || "0", 10) || 0;
+}
+
+function saveBestScore() {
+  localStorage.setItem(BEST_SCORE_KEY, String(state.bestScore));
+}
+
+function updateBestScore() {
+  if (state.score <= state.bestScore) return;
+
+  state.bestScore = state.score;
+  state.isNewBest = true;
+  saveBestScore();
+}
+
+function normalizeStat(stat) {
+  return { hits: stat?.hits || 0, misses: stat?.misses || 0 };
+}
+
+function ensureStat(key) {
+  if (!state.stats[key]) state.stats[key] = { hits: 0, misses: 0 };
+  return state.stats[key];
+}
+
+function currentLayout() {
+  return LAYOUTS[state.language] || LAYOUTS.en;
+}
+
+function currentKeyIds() {
+  return currentLayout().rows.flatMap((row) => row.split(""));
+}
+
+function keyFromEvent(event) {
+  const directKey = event.key.toLowerCase();
+  const keys = currentKeyIds();
+  if (keys.includes(directKey)) return directKey;
+
+  const rows = currentLayout().rows;
+  for (let rowIndex = 0; rowIndex < PHYSICAL_ROWS.length; rowIndex += 1) {
+    const columnIndex = PHYSICAL_ROWS[rowIndex].indexOf(event.code);
+    if (columnIndex === -1) continue;
+
+    return rows[rowIndex]?.[columnIndex] || "";
+  }
+
+  return "";
+}
+
+function getFingerGuide(index) {
+  if (index === 0) return { finger: "LP", color: "#ff6b6b" };
+  if (index === 1) return { finger: "LR", color: "#ffb13d" };
+  if (index === 2) return { finger: "LM", color: "#f8e55b" };
+  if (index <= 5) return { finger: "LI", color: "#75df72" };
+  if (index <= 8) return { finger: "RI", color: "#4ecdc4" };
+  if (index === 9) return { finger: "RM", color: "#5aa9ff" };
+  if (index === 10) return { finger: "RR", color: "#b786ff" };
+  return { finger: "RP", color: "#ff7ad9" };
 }
 
 async function loadAssets() {
@@ -121,8 +168,9 @@ function resize() {
 }
 
 function buildKeyboard(width, height) {
-  const rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
-  const keyWidth = Math.min(58, Math.max(30, (width - 48) / 11.2));
+  const rows = currentLayout().rows;
+  const longestRow = Math.max(...rows.map((row) => row.length));
+  const keyWidth = Math.min(58, Math.max(28, (width - 48) / (longestRow + 1.2)));
   const gap = Math.max(5, keyWidth * 0.13);
   const keyHeight = keyWidth * 0.82;
   const step = keyWidth + gap;
@@ -142,6 +190,7 @@ function buildKeyboard(width, height) {
       y,
       width: keyWidth,
       height: keyHeight,
+      guide: getFingerGuide(index),
     }));
   });
 }
@@ -150,10 +199,12 @@ function startGame() {
   if (!state.assets.ready) return;
 
   state.screen = "playing";
+  state.language = languageSelect.value;
   state.mode = modeSelect.value;
   state.difficulty = difficultySelect.value;
   state.highlightTarget = targetHighlightInput.checked;
   state.score = 0;
+  state.isNewBest = false;
   state.hp = 3;
   state.streak = 0;
   state.totalHits = 0;
@@ -166,9 +217,11 @@ function startGame() {
   state.pressed.clear();
   menuTitle.textContent = "Brainrot Keyboard Defense";
   menuResult.classList.add("is-hidden");
+  menuResult.classList.remove("is-record");
   menuResult.textContent = "";
   menu.classList.add("is-hidden");
   menuBackdrop.classList.add("is-hidden");
+  resize();
   spawnBrainrot();
 }
 
@@ -176,7 +229,10 @@ function endGame() {
   state.screen = "gameover";
   state.active = null;
   menuTitle.textContent = "Game Over";
-  menuResult.textContent = `Score ${state.score} / Level ${state.level + 1}`;
+  menuResult.textContent = state.isNewBest
+    ? `New best ${state.bestScore} / Level ${state.level + 1}`
+    : `Score ${state.score} / Best ${state.bestScore} / Level ${state.level + 1}`;
+  menuResult.classList.toggle("is-record", state.isNewBest);
   menuResult.classList.remove("is-hidden");
   menu.classList.remove("is-hidden");
   menuBackdrop.classList.remove("is-hidden");
@@ -195,33 +251,39 @@ function togglePause() {
 }
 
 function chooseKey() {
-  if (state.mode === "classic") return randomItem(KEY_IDS);
+  const keys = currentKeyIds();
+  if (state.mode === "classic") return randomItem(keys);
 
-  const weights = KEY_IDS.map((key) => {
-    const stat = state.stats[key];
+  const weights = keys.map((key) => {
+    const stat = ensureStat(key);
     const weakBonus = state.mode === "weak" ? stat.misses * 5 : stat.misses * 2;
     return 1 + weakBonus + Math.max(0, stat.misses - stat.hits);
   });
   const total = weights.reduce((sum, weight) => sum + weight, 0);
   let pick = Math.random() * total;
 
-  for (let i = 0; i < KEY_IDS.length; i += 1) {
+  for (let i = 0; i < keys.length; i += 1) {
     pick -= weights[i];
-    if (pick <= 0) return KEY_IDS[i];
+    if (pick <= 0) return keys[i];
   }
 
-  return randomItem(KEY_IDS);
+  return randomItem(keys);
 }
 
 function createSequence() {
   if (state.mode !== "words") return chooseKey();
 
-  const weakKeys = KEY_IDS.filter((key) => state.stats[key].misses > state.stats[key].hits);
+  const keys = currentKeyIds();
+  const words = currentLayout().words;
+  const weakKeys = keys.filter((key) => {
+    const stat = ensureStat(key);
+    return stat.misses > stat.hits;
+  });
   const candidates = weakKeys.length
-    ? WORDS.filter((word) => weakKeys.some((key) => word.includes(key)))
-    : WORDS;
+    ? words.filter((word) => weakKeys.some((key) => word.includes(key)))
+    : words;
 
-  return randomItem(candidates.length ? candidates : WORDS);
+  return randomItem(candidates.length ? candidates : words);
 }
 
 function spawnBrainrot() {
@@ -262,8 +324,9 @@ function processInput() {
     fireShot(key, target);
     if (!target) continue;
 
-    state.stats[key].hits += 1;
+    ensureStat(key).hits += 1;
     state.score += 1;
+    updateBestScore();
     state.streak += 1;
     state.totalHits += 1;
     state.level = Math.floor(state.totalHits / 10);
@@ -301,7 +364,7 @@ function update(delta) {
     state.active.wobble += delta * 5;
 
     if (state.active.y + state.active.size / 2 >= target.y) {
-      state.stats[state.active.key].misses += 1;
+      ensureStat(state.active.key).misses += 1;
       state.hp -= 1;
       state.streak = 0;
       saveStats();
@@ -381,12 +444,14 @@ function drawHud() {
   ctx.fillStyle = "#f7f3df";
   ctx.font = "800 18px Trebuchet MS";
   ctx.fillText(`SCORE ${state.score}`, 24, 34);
+  ctx.fillStyle = state.isNewBest ? "#b7ff37" : "#aeb0a7";
+  ctx.fillText(`BEST ${state.bestScore}`, 24, 58);
   ctx.fillStyle = state.hp <= 1 ? "#ff4d4d" : "#ffb13d";
-  ctx.fillText(`HP ${"I".repeat(Math.max(0, state.hp))}`, 24, 62);
+  ctx.fillText(`HP ${"I".repeat(Math.max(0, state.hp))}`, 24, 82);
   ctx.fillStyle = "#aeb0a7";
   ctx.font = "700 13px Trebuchet MS";
-  ctx.fillText(`${state.mode.toUpperCase()} / ${state.difficulty.toUpperCase()} / LV ${state.level + 1}`, 24, 86);
-  ctx.fillText("ESC PAUSE", 24, 110);
+  ctx.fillText(`${state.language.toUpperCase()} / ${state.mode.toUpperCase()} / ${state.difficulty.toUpperCase()} / LV ${state.level + 1}`, 24, 106);
+  ctx.fillText("ESC PAUSE", 24, 130);
   ctx.restore();
 }
 
@@ -440,8 +505,8 @@ function drawKeyboard() {
   drawFingerLegend();
 
   for (const key of state.keys) {
-    const stat = state.stats[key.id];
-    const guide = FINGER_GUIDES[key.id];
+    const stat = ensureStat(key.id);
+    const guide = key.guide;
     const heat = Math.min(1, stat.misses / Math.max(4, stat.hits + stat.misses));
     const isTarget = state.highlightTarget && state.active?.key === key.id;
     const isPressed = state.pressed.has(key.id);
@@ -702,13 +767,20 @@ window.addEventListener("keydown", (event) => {
     return;
   }
 
-  const key = event.key.toLowerCase();
-  if (state.screen === "playing" && KEY_IDS.includes(key)) {
+  const key = keyFromEvent(event);
+  if (state.screen === "playing" && key) {
     event.preventDefault();
     state.inputQueue.push(key);
   }
 
   if (event.key === "Enter" && state.screen !== "playing" && state.screen !== "paused") startGame();
+});
+
+languageSelect.addEventListener("change", () => {
+  if (state.screen === "playing" || state.screen === "paused") return;
+
+  state.language = languageSelect.value;
+  resize();
 });
 
 startButton.addEventListener("click", startGame);
