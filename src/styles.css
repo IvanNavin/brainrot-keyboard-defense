@@ -1,0 +1,144 @@
+:root {
+  color-scheme: dark;
+  --ink: #f7f3df;
+  --muted: #aeb0a7;
+  --panel: rgba(16, 20, 18, 0.82);
+  --panel-edge: rgba(247, 243, 223, 0.2);
+  --acid: #b7ff37;
+  --danger: #ff4d4d;
+  --amber: #ffb13d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #101412;
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Gill Sans", Verdana, sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(rgba(247, 243, 223, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247, 243, 223, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 20% 10%, rgba(183, 255, 55, 0.15), transparent 34%),
+    radial-gradient(circle at 85% 22%, rgba(255, 177, 61, 0.12), transparent 32%),
+    #101412;
+  background-size: 32px 32px, 32px 32px, auto, auto, auto;
+}
+
+.shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.menu {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(520px, calc(100vw - 32px));
+  padding: 28px;
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(18px);
+}
+
+.menu.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -48%) scale(0.98);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.brand {
+  margin-bottom: 24px;
+}
+
+.kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--acid);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.2rem, 8vw, 4.8rem);
+  line-height: 0.88;
+  letter-spacing: 0;
+}
+
+.controls {
+  display: grid;
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+select,
+button {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 6px;
+  font: inherit;
+}
+
+select {
+  border: 1px solid rgba(247, 243, 223, 0.18);
+  background: #1b211d;
+  color: var(--ink);
+  padding: 0 12px;
+}
+
+.start-button {
+  margin-top: 22px;
+  border: 0;
+  background: var(--acid);
+  color: #11150f;
+  cursor: pointer;
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: 0 0 24px rgba(183, 255, 55, 0.22);
+}
+
+.start-button:hover {
+  filter: brightness(1.08);
+}
+
+.start-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+  filter: grayscale(0.3);
+}

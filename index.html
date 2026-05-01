@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brainrot Keyboard Defense</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <canvas id="game" aria-label="Brainrot Keyboard Defense game canvas"></canvas>
+
+      <section id="menu" class="menu" aria-label="Game menu">
+        <div class="brand">
+          <span class="kicker">Keyboard trainer</span>
+          <h1>Brainrot Keyboard Defense</h1>
+        </div>
+
+        <div class="controls">
+          <label>
+            Language
+            <select id="language">
+              <option value="en">English layout</option>
+            </select>
+          </label>
+
+          <label>
+            Mode
+            <select id="mode">
+              <option value="classic">Classic</option>
+              <option value="weak">Weak keys</option>
+              <option value="words">Words</option>
+            </select>
+          </label>
+
+          <label>
+            Difficulty
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="start" class="start-button" type="button" disabled>Loading brainrots...</button>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
