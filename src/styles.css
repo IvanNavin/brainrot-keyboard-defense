@@ -106,6 +106,19 @@ h1 {
   letter-spacing: 0;
 }
 
+.menu-result {
+  margin: 18px 0 0;
+  color: var(--amber);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.menu-result.is-hidden {
+  display: none;
+}
+
 .controls {
   display: grid;
   gap: 14px;

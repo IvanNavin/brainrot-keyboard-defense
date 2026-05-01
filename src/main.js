@@ -2,6 +2,8 @@ const canvas = document.querySelector("#game");
 const ctx = canvas.getContext("2d");
 const menu = document.querySelector("#menu");
 const menuBackdrop = document.querySelector("#menuBackdrop");
+const menuTitle = document.querySelector("#menuTitle");
+const menuResult = document.querySelector("#menuResult");
 const startButton = document.querySelector("#start");
 const modeSelect = document.querySelector("#mode");
 const difficultySelect = document.querySelector("#difficulty");
@@ -14,6 +16,44 @@ const DIFFICULTY = {
   normal: { baseSpeed: 175, speedStep: 18 },
   hard: { baseSpeed: 230, speedStep: 25 },
 };
+const FINGER_GUIDES = {
+  q: { finger: "LP", color: "#ff6b6b" },
+  a: { finger: "LP", color: "#ff6b6b" },
+  z: { finger: "LP", color: "#ff6b6b" },
+  w: { finger: "LR", color: "#ffb13d" },
+  s: { finger: "LR", color: "#ffb13d" },
+  x: { finger: "LR", color: "#ffb13d" },
+  e: { finger: "LM", color: "#f8e55b" },
+  d: { finger: "LM", color: "#f8e55b" },
+  c: { finger: "LM", color: "#f8e55b" },
+  r: { finger: "LI", color: "#75df72" },
+  f: { finger: "LI", color: "#75df72" },
+  v: { finger: "LI", color: "#75df72" },
+  t: { finger: "LI", color: "#75df72" },
+  g: { finger: "LI", color: "#75df72" },
+  b: { finger: "LI", color: "#75df72" },
+  y: { finger: "RI", color: "#4ecdc4" },
+  h: { finger: "RI", color: "#4ecdc4" },
+  n: { finger: "RI", color: "#4ecdc4" },
+  u: { finger: "RI", color: "#4ecdc4" },
+  j: { finger: "RI", color: "#4ecdc4" },
+  m: { finger: "RI", color: "#4ecdc4" },
+  i: { finger: "RM", color: "#5aa9ff" },
+  k: { finger: "RM", color: "#5aa9ff" },
+  o: { finger: "RR", color: "#b786ff" },
+  l: { finger: "RR", color: "#b786ff" },
+  p: { finger: "RP", color: "#ff7ad9" },
+};
+const FINGER_LEGEND = [
+  ["LP", "left pinky", "#ff6b6b"],
+  ["LR", "left ring", "#ffb13d"],
+  ["LM", "left middle", "#f8e55b"],
+  ["LI", "left index", "#75df72"],
+  ["RI", "right index", "#4ecdc4"],
+  ["RM", "right middle", "#5aa9ff"],
+  ["RR", "right ring", "#b786ff"],
+  ["RP", "right pinky", "#ff7ad9"],
+];
 
 const state = {
   screen: "menu",
@@ -22,6 +62,7 @@ const state = {
   score: 0,
   hp: 3,
   streak: 0,
+  totalHits: 0,
   level: 0,
   active: null,
   keys: [],
@@ -83,7 +124,7 @@ function buildKeyboard(width, height) {
   const step = keyWidth + gap;
   const topRowWidth = rows[0].length * keyWidth + (rows[0].length - 1) * gap;
   const baseX = (width - topRowWidth) / 2;
-  const rowOffsets = [0, step * 0.5, step];
+  const rowOffsets = [0, 20, 40];
   const startY = height - keyHeight * 3 - gap * 2 - 42;
 
   return rows.flatMap((row, rowIndex) => {
@@ -110,11 +151,15 @@ function startGame() {
   state.score = 0;
   state.hp = 3;
   state.streak = 0;
+  state.totalHits = 0;
   state.level = 0;
   state.active = null;
   state.inputQueue = [];
   state.particles = [];
   state.pressed.clear();
+  menuTitle.textContent = "Brainrot Keyboard Defense";
+  menuResult.classList.add("is-hidden");
+  menuResult.textContent = "";
   menu.classList.add("is-hidden");
   menuBackdrop.classList.add("is-hidden");
   spawnBrainrot();
@@ -123,9 +168,23 @@ function startGame() {
 function endGame() {
   state.screen = "gameover";
   state.active = null;
+  menuTitle.textContent = "Game Over";
+  menuResult.textContent = `Score ${state.score} / Level ${state.level + 1}`;
+  menuResult.classList.remove("is-hidden");
   menu.classList.remove("is-hidden");
   menuBackdrop.classList.remove("is-hidden");
   startButton.textContent = "Restart defense";
+}
+
+function togglePause() {
+  if (state.screen === "playing") {
+    state.screen = "paused";
+    return;
+  }
+
+  if (state.screen === "paused") {
+    state.screen = "playing";
+  }
 }
 
 function chooseKey() {
@@ -198,7 +257,8 @@ function processInput() {
     state.stats[key].hits += 1;
     state.score += 1;
     state.streak += 1;
-    state.level = Math.floor(state.streak / 10);
+    state.totalHits += 1;
+    state.level = Math.floor(state.totalHits / 10);
     saveStats();
 
     if (target.progress < target.sequence.length - 1) {
@@ -216,7 +276,7 @@ function processInput() {
 }
 
 function update(delta) {
-  processInput();
+  if (state.screen === "playing") processInput();
 
   for (const [key, ttl] of state.pressed) {
     const next = ttl - delta * 1000;
@@ -235,7 +295,6 @@ function update(delta) {
       state.stats[state.active.key].misses += 1;
       state.hp -= 1;
       state.streak = 0;
-      state.level = 0;
       saveStats();
       burst(targetX, target.y, "#ff4d4d", 18);
       state.active.status = "missed";
@@ -266,6 +325,7 @@ function draw() {
   drawKeyboard();
   drawBrainrot();
   drawParticles();
+  drawStatusOverlay();
 }
 
 function drawArena(width, height) {
@@ -300,6 +360,7 @@ function drawHud() {
   ctx.fillStyle = "#aeb0a7";
   ctx.font = "700 13px Trebuchet MS";
   ctx.fillText(`${state.mode.toUpperCase()} / ${state.difficulty.toUpperCase()} / LV ${state.level + 1}`, 24, 86);
+  ctx.fillText("ESC PAUSE", 24, 110);
   ctx.restore();
 }
 
@@ -350,9 +411,11 @@ function drawKeyboard() {
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  drawFingerLegend();
 
   for (const key of state.keys) {
     const stat = state.stats[key.id];
+    const guide = FINGER_GUIDES[key.id];
     const heat = Math.min(1, stat.misses / Math.max(4, stat.hits + stat.misses));
     const isTarget = state.active?.key === key.id;
     const isPressed = state.pressed.has(key.id);
@@ -361,8 +424,8 @@ function drawKeyboard() {
       ? "#b7ff37"
       : isTarget
         ? "#29371f"
-        : `rgb(${28 + heat * 54}, ${34 - heat * 8}, ${31 - heat * 10})`;
-    ctx.strokeStyle = isTarget ? "#b7ff37" : "rgba(247, 243, 223, 0.18)";
+        : mixColor("#1c221f", guide.color, 0.24 + heat * 0.16);
+    ctx.strokeStyle = isTarget ? "#b7ff37" : withAlpha(guide.color, 0.72);
     ctx.lineWidth = isTarget ? 2 : 1;
     roundedRect(key.x, key.y, key.width, key.height, 7);
     ctx.fill();
@@ -371,8 +434,59 @@ function drawKeyboard() {
     ctx.fillStyle = isPressed ? "#11150f" : "#f7f3df";
     ctx.font = `900 ${Math.max(15, key.height * 0.38)}px Trebuchet MS`;
     ctx.fillText(key.label, key.x + key.width / 2, key.y + key.height / 2 + 1);
+
+    ctx.fillStyle = isPressed ? "#11150f" : withAlpha(guide.color, 0.95);
+    ctx.font = `800 ${Math.max(8, key.height * 0.18)}px Trebuchet MS`;
+    ctx.fillText(guide.finger, key.x + key.width / 2, key.y + key.height - 9);
   }
 
+  ctx.restore();
+}
+
+function drawFingerLegend() {
+  if (!state.keys.length) return;
+
+  const firstKey = state.keys[0];
+  const y = firstKey.y - 26;
+  let x = firstKey.x;
+  const isCompact = window.innerWidth < 760;
+
+  ctx.save();
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.font = "800 10px Trebuchet MS";
+
+  for (const [code, label, color] of FINGER_LEGEND) {
+    ctx.fillStyle = color;
+    roundedRect(x, y - 6, 10, 10, 3);
+    ctx.fill();
+    ctx.fillStyle = "#aeb0a7";
+    ctx.fillText(isCompact ? code : `${code} ${label}`, x + 14, y);
+    x += isCompact ? 54 : Math.min(112, Math.max(78, window.innerWidth / 9.8));
+  }
+
+  ctx.restore();
+}
+
+function drawStatusOverlay() {
+  if (state.screen !== "paused" && state.screen !== "gameover") return;
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const title = state.screen === "paused" ? "Paused" : "Game Over";
+  const subtitle = state.screen === "paused" ? "Press Esc to keep defending" : `Score ${state.score}`;
+
+  ctx.save();
+  ctx.fillStyle = "rgba(8, 11, 9, 0.46)";
+  ctx.fillRect(0, 0, width, height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#f7f3df";
+  ctx.font = "900 52px Georgia";
+  ctx.fillText(title, width / 2, height * 0.32);
+  ctx.fillStyle = "#ffb13d";
+  ctx.font = "900 18px Trebuchet MS";
+  ctx.fillText(subtitle.toUpperCase(), width / 2, height * 0.32 + 48);
   ctx.restore();
 }
 
@@ -419,6 +533,27 @@ function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+function mixColor(baseHex, tintHex, amount) {
+  const base = hexToRgb(baseHex);
+  const tint = hexToRgb(tintHex);
+  const mixed = base.map((value, index) => Math.round(value + (tint[index] - value) * amount));
+  return `rgb(${mixed[0]}, ${mixed[1]}, ${mixed[2]})`;
+}
+
+function withAlpha(hex, alpha) {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function hexToRgb(hex) {
+  const value = hex.replace("#", "");
+  return [
+    Number.parseInt(value.slice(0, 2), 16),
+    Number.parseInt(value.slice(2, 4), 16),
+    Number.parseInt(value.slice(4, 6), 16),
+  ];
+}
+
 function loop(now) {
   const delta = Math.min(0.033, (now - state.lastTime) / 1000);
   state.lastTime = now;
@@ -429,13 +564,19 @@ function loop(now) {
 
 window.addEventListener("resize", resize);
 window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    togglePause();
+    return;
+  }
+
   const key = event.key.toLowerCase();
-  if (KEY_IDS.includes(key)) {
+  if (state.screen === "playing" && KEY_IDS.includes(key)) {
     event.preventDefault();
     state.inputQueue.push(key);
   }
 
-  if (event.key === "Enter" && state.screen !== "playing") startGame();
+  if (event.key === "Enter" && state.screen !== "playing" && state.screen !== "paused") startGame();
 });
 
 startButton.addEventListener("click", startGame);
