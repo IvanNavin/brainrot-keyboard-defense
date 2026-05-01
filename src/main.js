@@ -63,6 +63,7 @@ const state = {
   particles: [],
   shots: [],
   fragments: [],
+  shockwaves: [],
   pressed: new Map(),
   stats: loadStats(),
   assets: {
@@ -214,6 +215,7 @@ function startGame() {
   state.particles = [];
   state.shots = [];
   state.fragments = [];
+  state.shockwaves = [];
   state.pressed.clear();
   menuTitle.textContent = "Brainrot Keyboard Defense";
   menuResult.classList.add("is-hidden");
@@ -401,6 +403,10 @@ function update(delta) {
       life: fragment.life - delta,
     }))
     .filter((fragment) => fragment.life > 0);
+
+  state.shockwaves = state.shockwaves
+    .map((shockwave) => ({ ...shockwave, life: shockwave.life - delta }))
+    .filter((shockwave) => shockwave.life > 0);
 }
 
 function draw() {
@@ -413,6 +419,7 @@ function draw() {
   drawShots();
   drawBrainrot();
   drawFragments();
+  drawShockwaves();
   drawParticles();
   drawStatusOverlay();
 }
@@ -479,22 +486,49 @@ function drawBrainrot() {
     brainrot.size,
   );
 
-  ctx.shadowBlur = 0;
-  ctx.textAlign = "center";
+  drawBrainrotLabel(brainrot, drawY + brainrot.size + 12);
+  ctx.restore();
+}
+
+function drawBrainrotLabel(brainrot, y) {
+  const letters = brainrot.sequence.toUpperCase().split("");
+  const fontSize = Math.max(18, brainrot.size * 0.38);
+
+  ctx.save();
+  ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.font = `900 ${Math.max(18, brainrot.size * 0.38)}px Trebuchet MS`;
+  ctx.font = `900 ${fontSize}px Trebuchet MS`;
   ctx.lineWidth = 5;
-  ctx.strokeStyle = "#101412";
-  ctx.fillStyle = "#f7f3df";
+  ctx.shadowBlur = 0;
 
-  const label = brainrot.sequence.length === 1
-    ? brainrot.key.toUpperCase()
-    : `${brainrot.sequence.slice(0, brainrot.progress).toUpperCase()}${brainrot.sequence
-        .slice(brainrot.progress)
-        .toUpperCase()}`;
+  const widths = letters.map((letter) => ctx.measureText(letter).width);
+  const gap = brainrot.sequence.length > 1 ? Math.max(2, fontSize * 0.08) : 0;
+  const totalWidth = widths.reduce((sum, width) => sum + width, 0) + gap * (letters.length - 1);
+  let x = brainrot.x - totalWidth / 2;
 
-  ctx.strokeText(label, brainrot.x, drawY + brainrot.size + 12);
-  ctx.fillText(label, brainrot.x, drawY + brainrot.size + 12);
+  letters.forEach((letter, index) => {
+    const isDone = brainrot.sequence.length > 1 && index < brainrot.progress;
+    const isCurrent = index === brainrot.progress;
+    const fill = isDone ? "#b7ff37" : isCurrent ? "#f7f3df" : "#777d74";
+
+    ctx.strokeStyle = "#101412";
+    ctx.fillStyle = fill;
+    ctx.strokeText(letter, x, y);
+    ctx.fillText(letter, x, y);
+
+    if (isDone) {
+      ctx.strokeStyle = "rgba(183, 255, 55, 0.82)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y + fontSize * 0.34);
+      ctx.lineTo(x + widths[index], y + fontSize * 0.34);
+      ctx.stroke();
+      ctx.lineWidth = 5;
+    }
+
+    x += widths[index] + gap;
+  });
+
   ctx.restore();
 }
 
@@ -587,6 +621,29 @@ function drawFragments() {
       fragment.size,
     );
     ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawShockwaves() {
+  ctx.save();
+  for (const shockwave of state.shockwaves) {
+    const progress = 1 - shockwave.life / shockwave.maxLife;
+    const alpha = Math.max(0, shockwave.life / shockwave.maxLife);
+
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = shockwave.color;
+    ctx.lineWidth = 5 * alpha;
+    ctx.shadowColor = shockwave.color;
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(shockwave.x, shockwave.y, shockwave.radius + progress * shockwave.grow, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = withAlpha("#f7f3df", alpha * 0.32);
+    ctx.beginPath();
+    ctx.arc(shockwave.x, shockwave.y, Math.max(1, shockwave.radius * (1 - progress)), 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -702,6 +759,16 @@ function shatterBrainrot(brainrot) {
   const cols = 3;
   const rows = 3;
   const pieceSize = brainrot.size / cols;
+
+  state.shockwaves.push({
+    x: brainrot.x,
+    y: brainrot.y,
+    radius: brainrot.size * 0.24,
+    grow: brainrot.size * 1.35,
+    color: "#b7ff37",
+    life: 0.34,
+    maxLife: 0.34,
+  });
 
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
