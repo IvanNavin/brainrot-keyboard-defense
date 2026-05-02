@@ -11,20 +11,33 @@ const elements = {
   menuResult: document.querySelector("#menuResult"),
   startButton: document.querySelector("#start"),
   backToMenuButton: document.querySelector("#backToMenu"),
+  siteLanguageSelect: document.querySelector("#siteLanguage"),
+  siteLanguageLabel: document.querySelector("#siteLanguageLabel"),
   languageSelect: document.querySelector("#language"),
+  languageLabel: document.querySelector("#languageLabel"),
   modeSelect: document.querySelector("#mode"),
-  difficultySelect: document.querySelector("#difficulty"),
+  modeLabel: document.querySelector("#modeLabel"),
+  focusSelect: document.querySelector("#focus"),
+  focusLabel: document.querySelector("#focusLabel"),
+  startSpeedSelect: document.querySelector("#startSpeed"),
+  startSpeedLabel: document.querySelector("#startSpeedLabel"),
   targetHighlightInput: document.querySelector("#targetHighlight"),
+  targetHighlightLabel: document.querySelector("#targetHighlightLabel"),
+  soundInput: document.querySelector("#sound"),
+  soundLabel: document.querySelector("#soundLabel"),
 };
 
 const game = createGame({ canvas, ctx, elements });
 
 window.addEventListener("resize", game.resize);
 window.addEventListener("keydown", game.handleKeyDown);
+elements.siteLanguageSelect.addEventListener("change", game.handleSettingsChange);
 elements.languageSelect.addEventListener("change", game.handleLanguageChange);
 elements.modeSelect.addEventListener("change", game.handleSettingsChange);
-elements.difficultySelect.addEventListener("change", game.handleSettingsChange);
+elements.focusSelect.addEventListener("change", game.handleSettingsChange);
+elements.startSpeedSelect.addEventListener("change", game.handleSettingsChange);
 elements.targetHighlightInput.addEventListener("change", game.handleSettingsChange);
+elements.soundInput.addEventListener("change", game.handleSettingsChange);
 elements.startButton.addEventListener("click", game.startGame);
 elements.backToMenuButton.addEventListener("click", game.returnToMenu);
 

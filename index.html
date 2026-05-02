@@ -20,16 +20,24 @@
         </div>
 
         <div class="controls">
-          <label>
-            Language
+          <label for="siteLanguage">
+            <span id="siteLanguageLabel">Site language</span>
+            <select id="siteLanguage">
+              <option value="en">English</option>
+              <option value="uk">Українська</option>
+            </select>
+          </label>
+
+          <label for="language">
+            <span id="languageLabel">Keyboard language</span>
             <select id="language">
               <option value="en">English layout</option>
               <option value="uk">Українська розкладка</option>
             </select>
           </label>
 
-          <label>
-            Mode
+          <label for="mode">
+            <span id="modeLabel">Mode</span>
             <select id="mode">
               <option value="classic">Classic</option>
               <option value="weak">Weak keys</option>
@@ -37,18 +45,42 @@
             </select>
           </label>
 
-          <label>
-            Difficulty
-            <select id="difficulty">
-              <option value="easy">Easy</option>
+          <label for="focus">
+            <span id="focusLabel">Focus</span>
+            <select id="focus">
+              <option value="all">All fingers</option>
+              <option value="top">Top row</option>
+              <option value="home">Home row</option>
+              <option value="bottom">Bottom row</option>
+              <option value="LP">LP left pinky</option>
+              <option value="LR">LR left ring</option>
+              <option value="LM">LM left middle</option>
+              <option value="LI">LI left index</option>
+              <option value="RI">RI right index</option>
+              <option value="RM">RM right middle</option>
+              <option value="RR">RR right ring</option>
+              <option value="RP">RP right pinky</option>
+            </select>
+          </label>
+
+          <label for="startSpeed">
+            <span id="startSpeedLabel">Start speed</span>
+            <select id="startSpeed">
+              <option value="slow">Slow</option>
               <option value="normal" selected>Normal</option>
-              <option value="hard">Hard</option>
+              <option value="fast">Fast</option>
+              <option value="insane">Insane</option>
             </select>
           </label>
 
           <label class="check-row">
             <input id="targetHighlight" type="checkbox" />
-            <span>Highlight target key</span>
+            <span id="targetHighlightLabel">Highlight target key</span>
+          </label>
+
+          <label class="check-row">
+            <input id="sound" type="checkbox" checked />
+            <span id="soundLabel">Sound effects</span>
           </label>
         </div>
 

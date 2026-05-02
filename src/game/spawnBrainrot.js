@@ -1,4 +1,4 @@
-import { DIFFICULTY } from "../config.js";
+import { SPEED_PRESETS } from "../config.js";
 import { randomItem } from "../utils.js";
 import { createSequence } from "./createSequence.js";
 import { getKey } from "./getKey.js";
@@ -8,7 +8,7 @@ export function spawnBrainrot(state) {
   const key = sequence[0];
   const keyboardKey = getKey(state, key);
   const size = keyboardKey.height * 1.08;
-  const speedConfig = DIFFICULTY[state.difficulty];
+  const speedConfig = SPEED_PRESETS[state.startSpeed] || SPEED_PRESETS.normal;
 
   state.active = {
     id: crypto.randomUUID(),

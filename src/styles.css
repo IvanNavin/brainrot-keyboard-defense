@@ -79,6 +79,9 @@ body::before {
   left: 50%;
   top: 50%;
   width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 28px;
   border: 1px solid var(--panel-edge);
   border-radius: 8px;
@@ -116,7 +119,7 @@ body::before {
 h1 {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.2rem, 8vw, 4.8rem);
+  font-size: clamp(2.2rem, 7vw, 4.8rem);
   line-height: 0.88;
   letter-spacing: 0;
 }
@@ -127,6 +130,7 @@ h1 {
   font-size: 1rem;
   font-weight: 900;
   line-height: 1.4;
+  white-space: pre-line;
   text-transform: uppercase;
 }
 
@@ -220,4 +224,44 @@ select {
 
 .secondary-button.is-hidden {
   display: none;
+}
+
+@media (max-height: 760px), (max-width: 560px) {
+  .menu {
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    padding: 18px;
+    transform: translateX(-50%);
+  }
+
+  .menu.is-hidden {
+    transform: translate(-50%, -8px) scale(0.98);
+  }
+
+  .brand {
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 11vw, 3.2rem);
+    line-height: 0.92;
+  }
+
+  .menu-result {
+    margin-top: 10px;
+    font-size: 0.88rem;
+  }
+
+  .controls {
+    gap: 9px;
+  }
+
+  select,
+  button {
+    min-height: 40px;
+  }
+
+  .start-button {
+    margin-top: 14px;
+  }
 }

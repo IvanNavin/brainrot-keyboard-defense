@@ -1,8 +1,8 @@
-import { currentKeyIds } from "../layout.js";
 import { randomItem } from "../utils.js";
+import { getEligibleKeyIds } from "./getEligibleKeyIds.js";
 
 export function chooseKey(state) {
-  const keys = currentKeyIds(state);
+  const keys = getEligibleKeyIds(state);
   if (state.mode === "classic") return randomItem(keys);
 
   const weights = keys.map((key) => {

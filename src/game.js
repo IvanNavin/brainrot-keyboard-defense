@@ -1,4 +1,6 @@
 import { createInitialState } from "./game/createInitialState.js";
+import { createGameSummary } from "./game/createGameSummary.js";
+import { createAudioEngine } from "./audio.js";
 import { endGame } from "./game/endGame.js";
 import { ensureStat as ensurePersistedStat } from "./game/ensureStat.js";
 import { handleKeyDown } from "./game/handleKeyDown.js";
@@ -22,6 +24,7 @@ import { loadWordLibrary } from "./wordLibrary.js";
 export function createGame({ canvas, ctx, elements }) {
   const persisted = loadPersistedState();
   const state = createInitialState(persisted, (key) => ensurePersistedStat(state, key));
+  state.audio = createAudioEngine();
   const context = {
     canvas,
     ctx,
@@ -33,6 +36,7 @@ export function createGame({ canvas, ctx, elements }) {
     startGame: () => startGame(context),
     returnToMenu: () => returnToMenu(context),
     endGame: () => endGame(context),
+    createGameSummary: () => createGameSummary(state),
     togglePause: () => togglePause(context),
     spawnBrainrot: () => spawnBrainrot(state),
     processInput: () => processInput(context),

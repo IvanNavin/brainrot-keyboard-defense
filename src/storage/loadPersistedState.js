@@ -13,7 +13,11 @@ export function loadPersistedState() {
     return {
       ...fallback,
       ...parsed,
-      settings: { ...fallback.settings, ...parsed.settings },
+      settings: {
+        ...fallback.settings,
+        ...parsed.settings,
+        startSpeed: parsed.settings?.startSpeed || parsed.settings?.difficulty || fallback.settings.startSpeed,
+      },
       bestScore: parsed.bestScore ?? legacyBest,
       stats: normalizeStats({ ...legacyStats, ...parsed.stats }),
       lastRun: parsed.lastRun || null,

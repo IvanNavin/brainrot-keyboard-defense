@@ -1,5 +1,6 @@
 import { COLORS } from "../config.js";
 import { burst, shatterBrainrot } from "../effects.js";
+import { ensureRunStat } from "./ensureRunStat.js";
 import { getKey } from "./getKey.js";
 
 export function updateActiveBrainrot(context, delta) {
@@ -14,9 +15,13 @@ export function updateActiveBrainrot(context, delta) {
 
   if (state.active.y + state.active.size / 2 < target.y) return;
 
+  ensureRunStat(state, state.active.key).misses += 1;
   state.ensureStat(state.active.key).misses += 1;
+  state.totalAttempts += 1;
+  state.totalMistakes += 1;
   state.hp -= 1;
   state.streak = 0;
+  state.audio?.miss();
   state.active.x = targetX;
   state.active.y = target.y;
   shatterBrainrot(state, state.active, COLORS.danger);

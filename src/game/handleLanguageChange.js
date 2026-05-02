@@ -5,5 +5,6 @@ export function handleLanguageChange(context) {
   state.language = elements.languageSelect.value;
   state.persisted.settings.language = state.language;
   context.resize();
+  context.updateMenuForScreen();
   context.persistState();
 }

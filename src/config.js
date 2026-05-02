@@ -22,11 +22,19 @@ export const PHYSICAL_ROWS = [
   ["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM", "Comma", "Period"],
 ];
 
-export const DIFFICULTY = {
-  easy: { baseSpeed: 135, speedStep: 13 },
+export const SPEED_PRESETS = {
+  slow: { baseSpeed: 125, speedStep: 12 },
   normal: { baseSpeed: 175, speedStep: 18 },
-  hard: { baseSpeed: 230, speedStep: 25 },
+  fast: { baseSpeed: 230, speedStep: 25 },
+  insane: { baseSpeed: 290, speedStep: 32 },
 };
+
+export const COMBO_TIERS = [
+  { streak: 30, multiplier: 4 },
+  { streak: 20, multiplier: 3 },
+  { streak: 10, multiplier: 2 },
+  { streak: 0, multiplier: 1 },
+];
 
 export const COLORS = {
   ink: "#f7f3df",

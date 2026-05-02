@@ -1,15 +1,17 @@
 import { COLORS } from "../config.js";
+import { getCopy } from "../i18n.js";
 
 export function drawStatusOverlay(ctx, state, width, height) {
   if (state.screen !== "paused" && state.screen !== "gameover" && state.screen !== "hitpause") return;
 
+  const copy = getCopy(state.siteLanguage);
   const seconds = Math.ceil(Math.max(0, state.resumeAt - performance.now()) / 1000);
-  const title = state.screen === "paused" ? "Paused" : state.screen === "hitpause" ? "Hit Taken" : "Game Over";
+  const title = state.screen === "paused" ? copy.paused : state.screen === "hitpause" ? copy.hitTaken : copy.gameOver;
   const subtitle = state.screen === "paused"
-    ? "Press Esc to keep defending"
+    ? copy.keepDefending
     : state.screen === "hitpause"
-      ? `Next wave in ${seconds}`
-      : `Score ${state.score}`;
+      ? `${copy.nextWave} ${seconds}`
+      : `${copy.score} ${state.score}`;
 
   ctx.save();
   ctx.fillStyle = COLORS.overlay;

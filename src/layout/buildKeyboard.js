@@ -20,6 +20,7 @@ export function buildKeyboard(width, height, state) {
     return row.split("").map((id, index) => ({
       id,
       label: id.toUpperCase(),
+      rowIndex,
       x: startX + index * step,
       y,
       width: keyWidth,
