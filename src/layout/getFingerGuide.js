@@ -46,9 +46,41 @@ const UK_FINGER_BY_KEY = {
   ї: "RP",
 };
 
+const EN_FINGER_BY_KEY = {
+  q: "LP",
+  a: "LP",
+  z: "LP",
+  w: "LR",
+  s: "LR",
+  x: "LR",
+  e: "LM",
+  d: "LM",
+  c: "LM",
+  r: "LI",
+  t: "LI",
+  f: "LI",
+  g: "LI",
+  v: "LI",
+  b: "LI",
+  y: "RI",
+  h: "RI",
+  n: "RI",
+  u: "RI",
+  j: "RI",
+  m: "RI",
+  i: "RM",
+  k: "RM",
+  o: "RR",
+  l: "RR",
+  p: "RP",
+};
+
 export function getFingerGuide(index, keyId, language) {
   const ukFinger = language === "uk" ? UK_FINGER_BY_KEY[keyId] : null;
   if (ukFinger) return { finger: ukFinger, color: FINGER_COLORS[ukFinger] };
+
+  const enFinger = language === "en" ? EN_FINGER_BY_KEY[keyId] : null;
+  if (enFinger) return { finger: enFinger, color: FINGER_COLORS[enFinger] };
 
   if (index === 0) return { finger: "LP", color: COLORS.fingers.leftPinky };
   if (index === 1) return { finger: "LR", color: COLORS.fingers.leftRing };

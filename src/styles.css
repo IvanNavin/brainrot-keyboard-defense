@@ -95,6 +95,10 @@ body::before {
   transform: translate(-50%, -48%) scale(0.98);
 }
 
+.menu.is-compact .controls {
+  display: none;
+}
+
 .brand {
   margin-bottom: 24px;
 }
@@ -197,4 +201,23 @@ select {
   cursor: wait;
   opacity: 0.62;
   filter: grayscale(0.3);
+}
+
+.secondary-button {
+  margin-top: 10px;
+  border: 1px solid var(--panel-edge);
+  background: var(--panel-field);
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.secondary-button:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.secondary-button.is-hidden {
+  display: none;
 }

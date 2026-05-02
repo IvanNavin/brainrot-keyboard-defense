@@ -9,6 +9,7 @@ import { loopGame } from "./game/loopGame.js";
 import { persistState as persistGameState } from "./game/persistState.js";
 import { processInput } from "./game/processInput.js";
 import { resizeGame } from "./game/resizeGame.js";
+import { returnToMenu } from "./game/returnToMenu.js";
 import { spawnBrainrot } from "./game/spawnBrainrot.js";
 import { startGame } from "./game/startGame.js";
 import { togglePause } from "./game/togglePause.js";
@@ -30,6 +31,7 @@ export function createGame({ canvas, ctx, elements }) {
     init: (assets) => initGame(context, assets),
     resize: () => resizeGame(canvas, ctx, state),
     startGame: () => startGame(context),
+    returnToMenu: () => returnToMenu(context),
     endGame: () => endGame(context),
     togglePause: () => togglePause(context),
     spawnBrainrot: () => spawnBrainrot(state),

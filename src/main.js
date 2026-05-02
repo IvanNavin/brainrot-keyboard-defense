@@ -10,6 +10,7 @@ const elements = {
   menuTitle: document.querySelector("#menuTitle"),
   menuResult: document.querySelector("#menuResult"),
   startButton: document.querySelector("#start"),
+  backToMenuButton: document.querySelector("#backToMenu"),
   languageSelect: document.querySelector("#language"),
   modeSelect: document.querySelector("#mode"),
   difficultySelect: document.querySelector("#difficulty"),
@@ -25,6 +26,7 @@ elements.modeSelect.addEventListener("change", game.handleSettingsChange);
 elements.difficultySelect.addEventListener("change", game.handleSettingsChange);
 elements.targetHighlightInput.addEventListener("change", game.handleSettingsChange);
 elements.startButton.addEventListener("click", game.startGame);
+elements.backToMenuButton.addEventListener("click", game.returnToMenu);
 
 game.resize();
 loadAssets()

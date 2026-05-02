@@ -2,6 +2,13 @@ export function startGame(context) {
   const { elements, state } = context;
   if (!state.assets.ready) return;
 
+  if (state.screen === "paused") {
+    state.screen = "playing";
+    context.updateMenuForScreen();
+    context.persistState();
+    return;
+  }
+
   state.screen = "playing";
   state.language = elements.languageSelect.value;
   state.mode = elements.modeSelect.value;
