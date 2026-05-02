@@ -1,10 +1,15 @@
 import { COLORS } from "../config.js";
 
 export function drawStatusOverlay(ctx, state, width, height) {
-  if (state.screen !== "paused" && state.screen !== "gameover") return;
+  if (state.screen !== "paused" && state.screen !== "gameover" && state.screen !== "hitpause") return;
 
-  const title = state.screen === "paused" ? "Paused" : "Game Over";
-  const subtitle = state.screen === "paused" ? "Press Esc to keep defending" : `Score ${state.score}`;
+  const seconds = Math.ceil(Math.max(0, state.resumeAt - performance.now()) / 1000);
+  const title = state.screen === "paused" ? "Paused" : state.screen === "hitpause" ? "Impact" : "Game Over";
+  const subtitle = state.screen === "paused"
+    ? "Press Esc to keep defending"
+    : state.screen === "hitpause"
+      ? `Next wave in ${seconds}`
+      : `Score ${state.score}`;
 
   ctx.save();
   ctx.fillStyle = COLORS.overlay;

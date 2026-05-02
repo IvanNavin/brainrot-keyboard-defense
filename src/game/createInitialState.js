@@ -18,7 +18,7 @@ export function createInitialState(persisted, ensureStat) {
     shots: [],
     fragments: [],
     shockwaves: [],
-    restartAvailableAt: 0,
+    resumeAt: 0,
     pressed: new Map(),
     dictionaries: {},
     assets: { image: null, frames: [], ready: false },

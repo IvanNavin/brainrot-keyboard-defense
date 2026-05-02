@@ -12,5 +12,6 @@ export function createRunSnapshot(state) {
     totalHits: state.totalHits,
     level: state.level,
     active: state.active,
+    resumeAt: state.resumeAt,
   };
 }

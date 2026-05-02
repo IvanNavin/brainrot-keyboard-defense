@@ -1,7 +1,6 @@
 export function startGame(context) {
   const { elements, state } = context;
   if (!state.assets.ready) return;
-  if (state.screen === "gameover" && performance.now() < state.restartAvailableAt) return;
 
   state.screen = "playing";
   state.language = elements.languageSelect.value;
@@ -20,7 +19,7 @@ export function startGame(context) {
   state.shots = [];
   state.fragments = [];
   state.shockwaves = [];
-  state.restartAvailableAt = 0;
+  state.resumeAt = 0;
   state.pressed.clear();
   context.resize();
   context.spawnBrainrot();
