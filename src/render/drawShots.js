@@ -1,3 +1,5 @@
+import { COLORS } from "../config.js";
+
 export function drawShots(ctx, state) {
   ctx.save();
   ctx.lineCap = "round";
@@ -11,7 +13,7 @@ export function drawShots(ctx, state) {
     const tailY = shot.y1 + (shot.y2 - shot.y1) * Math.max(0, progress * 1.25 - 0.22);
 
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle = shot.hit ? "#b7ff37" : "#ff4d4d";
+    ctx.strokeStyle = shot.hit ? COLORS.acid : COLORS.danger;
     ctx.lineWidth = shot.hit ? 4 : 3;
     ctx.shadowColor = ctx.strokeStyle;
     ctx.shadowBlur = 14;
@@ -20,7 +22,7 @@ export function drawShots(ctx, state) {
     ctx.lineTo(headX, headY);
     ctx.stroke();
 
-    ctx.fillStyle = "#f7f3df";
+    ctx.fillStyle = COLORS.ink;
     ctx.beginPath();
     ctx.arc(headX, headY, shot.hit ? 4 : 3, 0, Math.PI * 2);
     ctx.fill();

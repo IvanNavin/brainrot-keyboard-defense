@@ -1,3 +1,5 @@
+import { COLORS } from "../config.js";
+
 export function shatterBrainrot(state, brainrot) {
   const cols = 3;
   const rows = 3;
@@ -8,7 +10,7 @@ export function shatterBrainrot(state, brainrot) {
     y: brainrot.y,
     radius: brainrot.size * 0.24,
     grow: brainrot.size * 1.35,
-    color: "#b7ff37",
+    color: COLORS.acid,
     life: 0.34,
     maxLife: 0.34,
   });

@@ -1,3 +1,5 @@
+import { COLORS } from "../config.js";
+
 export function drawBrainrotLabel(ctx, brainrot, y) {
   const letters = brainrot.sequence.toUpperCase().split("");
   const fontSize = Math.max(18, brainrot.size * 0.38);
@@ -17,15 +19,15 @@ export function drawBrainrotLabel(ctx, brainrot, y) {
   letters.forEach((letter, index) => {
     const isDone = brainrot.sequence.length > 1 && index < brainrot.progress;
     const isCurrent = index === brainrot.progress;
-    const fill = isDone ? "#b7ff37" : isCurrent ? "#f7f3df" : "#777d74";
+    const fill = isDone ? COLORS.acid : isCurrent ? COLORS.ink : COLORS.labelFuture;
 
-    ctx.strokeStyle = "#101412";
+    ctx.strokeStyle = COLORS.black;
     ctx.fillStyle = fill;
     ctx.strokeText(letter, x, y);
     ctx.fillText(letter, x, y);
 
     if (isDone) {
-      ctx.strokeStyle = "rgba(183, 255, 55, 0.82)";
+      ctx.strokeStyle = COLORS.doneUnderline;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(x, y + fontSize * 0.34);

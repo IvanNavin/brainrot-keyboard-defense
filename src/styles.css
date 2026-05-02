@@ -7,6 +7,17 @@
   --acid: #b7ff37;
   --danger: #ff4d4d;
   --amber: #ffb13d;
+  --bg: #101412;
+  --panel-field: #1b211d;
+  --button-text: #11150f;
+  --grid-line: rgba(247, 243, 223, 0.025);
+  --glow-acid-soft: rgba(183, 255, 55, 0.15);
+  --glow-amber-soft: rgba(255, 177, 61, 0.12);
+  --menu-backdrop: rgba(8, 11, 9, 0.26);
+  --shadow-heavy: rgba(0, 0, 0, 0.45);
+  --record-glow: rgba(183, 255, 55, 0.42);
+  --field-edge: rgba(247, 243, 223, 0.18);
+  --button-glow: rgba(183, 255, 55, 0.22);
 }
 
 * {
@@ -19,7 +30,7 @@ body {
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #101412;
+  background: var(--bg);
   color: var(--ink);
   font-family: "Trebuchet MS", "Gill Sans", Verdana, sans-serif;
 }
@@ -30,11 +41,11 @@ body::before {
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(rgba(247, 243, 223, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(247, 243, 223, 0.025) 1px, transparent 1px),
-    radial-gradient(circle at 20% 10%, rgba(183, 255, 55, 0.15), transparent 34%),
-    radial-gradient(circle at 85% 22%, rgba(255, 177, 61, 0.12), transparent 32%),
-    #101412;
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    radial-gradient(circle at 20% 10%, var(--glow-acid-soft), transparent 34%),
+    radial-gradient(circle at 85% 22%, var(--glow-amber-soft), transparent 32%),
+    var(--bg);
   background-size: 32px 32px, 32px 32px, auto, auto, auto;
 }
 
@@ -54,7 +65,7 @@ body::before {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: rgba(8, 11, 9, 0.26);
+  background: var(--menu-backdrop);
   backdrop-filter: blur(10px);
   transition: opacity 180ms ease;
 }
@@ -72,7 +83,7 @@ body::before {
   border: 1px solid var(--panel-edge);
   border-radius: 8px;
   background: var(--panel);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 80px var(--shadow-heavy);
   transform: translate(-50%, -50%);
   backdrop-filter: blur(20px);
   transition: opacity 180ms ease, transform 180ms ease;
@@ -117,7 +128,7 @@ h1 {
 
 .menu-result.is-record {
   color: var(--acid);
-  text-shadow: 0 0 22px rgba(183, 255, 55, 0.42);
+  text-shadow: 0 0 22px var(--record-glow);
 }
 
 .menu-result.is-hidden {
@@ -161,8 +172,8 @@ button {
 }
 
 select {
-  border: 1px solid rgba(247, 243, 223, 0.18);
-  background: #1b211d;
+  border: 1px solid var(--field-edge);
+  background: var(--panel-field);
   color: var(--ink);
   padding: 0 12px;
 }
@@ -171,11 +182,11 @@ select {
   margin-top: 22px;
   border: 0;
   background: var(--acid);
-  color: #11150f;
+  color: var(--button-text);
   cursor: pointer;
   font-weight: 900;
   text-transform: uppercase;
-  box-shadow: 0 0 24px rgba(183, 255, 55, 0.22);
+  box-shadow: 0 0 24px var(--button-glow);
 }
 
 .start-button:hover {

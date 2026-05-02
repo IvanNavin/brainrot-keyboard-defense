@@ -1,4 +1,5 @@
 import { burst, fireShot, shatterBrainrot } from "../effects.js";
+import { COLORS } from "../config.js";
 
 export function processInput(context) {
   const { state } = context;
@@ -21,13 +22,13 @@ export function processInput(context) {
     if (target.progress < target.sequence.length - 1) {
       target.progress += 1;
       target.key = target.sequence[target.progress];
-      burst(state, target.x, target.y, "#b7ff37", 8);
+      burst(state, target.x, target.y, COLORS.acid, 8);
       context.persistState();
       return;
     }
 
     shatterBrainrot(state, target);
-    burst(state, target.x, target.y, "#b7ff37", 22);
+    burst(state, target.x, target.y, COLORS.acid, 22);
     state.active = null;
     context.spawnBrainrot();
     context.persistState();

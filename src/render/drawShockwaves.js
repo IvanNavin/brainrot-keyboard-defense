@@ -1,3 +1,4 @@
+import { COLORS } from "../config.js";
 import { withAlpha } from "../utils.js";
 
 export function drawShockwaves(ctx, state) {
@@ -15,7 +16,7 @@ export function drawShockwaves(ctx, state) {
     ctx.arc(shockwave.x, shockwave.y, shockwave.radius + progress * shockwave.grow, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.fillStyle = withAlpha("#f7f3df", alpha * 0.32);
+    ctx.fillStyle = withAlpha(COLORS.ink, alpha * 0.32);
     ctx.beginPath();
     ctx.arc(shockwave.x, shockwave.y, Math.max(1, shockwave.radius * (1 - progress)), 0, Math.PI * 2);
     ctx.fill();

@@ -1,3 +1,4 @@
+import { COLORS } from "../config.js";
 import { burst } from "../effects.js";
 import { getKey } from "./getKey.js";
 
@@ -16,7 +17,7 @@ export function updateActiveBrainrot(context, delta) {
   state.ensureStat(state.active.key).misses += 1;
   state.hp -= 1;
   state.streak = 0;
-  burst(state, targetX, target.y, "#ff4d4d", 18);
+  burst(state, targetX, target.y, COLORS.danger, 18);
   state.active = null;
 
   if (state.hp <= 0) context.endGame();
