@@ -1,7 +1,8 @@
 export async function loadAssets() {
-  const atlas = await fetch("./assets/brainrots/spritesheet-runtime.json").then((res) => res.json());
+  const baseUrl = import.meta.env.BASE_URL;
+  const atlas = await fetch(`${baseUrl}assets/brainrots/spritesheet-runtime.json`).then((res) => res.json());
   const image = new Image();
-  image.src = "./assets/brainrots/spritesheet-runtime.png";
+  image.src = `${baseUrl}assets/brainrots/spritesheet-runtime.png`;
   await image.decode();
 
   return {

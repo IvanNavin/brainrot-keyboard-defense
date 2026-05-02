@@ -4,11 +4,11 @@ export const MAX_WORD_LENGTH = 4;
 export const LAYOUTS = {
   en: {
     rows: ["qwertyuiop", "asdfghjkl", "zxcvbnm"],
-    dictionaryPath: "./src/dictionaries/en.json",
+    dictionaryPath: "dictionaries/en.json",
   },
   uk: {
     rows: ["йцукенгшщзхї", "фівапролджє", "ячсмитьбю"],
-    dictionaryPath: "./src/dictionaries/uk.json",
+    dictionaryPath: "dictionaries/uk.json",
   },
 };
 
