@@ -25,7 +25,10 @@ Open `http://localhost:5173`.
 
 - `src/main.js` bootstraps DOM, assets, and the game
 - `src/game.js` owns gameplay state and persistence orchestration
-- `src/renderer.js` draws the canvas
+- `src/game/` contains focused one-function game helpers
+- `src/renderer.js` composes canvas rendering
+- `src/render/` contains focused one-function draw helpers
 - `src/layout.js` owns keyboard layouts and physical key mapping
 - `src/effects.js` owns shots, bursts, and shatter effects
 - `src/storage.js` owns localStorage read/write and migration
+- `src/wordLibrary.js` loads dictionary JSON and filters words to 2-4 characters

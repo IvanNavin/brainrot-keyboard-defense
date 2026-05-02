@@ -1,4 +1,5 @@
 export const STORAGE_KEY = "brainrot-keyboard-defense.state.v2";
+export const MAX_WORD_LENGTH = 4;
 
 export const LAYOUTS = {
   en: {

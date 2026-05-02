@@ -1,9 +1,19 @@
 import { DIFFICULTY } from "./config.js";
 import { burst, fireShot, shatterBrainrot } from "./effects.js";
-import { buildKeyboard, currentKeyIds, currentLayout, keyFromEvent } from "./layout.js";
+import { applySettingsToMenu } from "./game/applySettingsToMenu.js";
+import { ensureStat as ensurePersistedStat } from "./game/ensureStat.js";
+import { persistState as persistGameState } from "./game/persistState.js";
+import { resizeGame } from "./game/resizeGame.js";
+import { restoreLastRun } from "./game/restoreLastRun.js";
+import { syncSettingsFromMenu } from "./game/syncSettingsFromMenu.js";
+import { updateBestScore as updatePersistedBestScore } from "./game/updateBestScore.js";
+import { updateMenuForScreen as syncMenuForScreen } from "./game/updateMenuForScreen.js";
+import { updateTransientEffects } from "./game/updateTransientEffects.js";
+import { currentKeyIds, currentLayout, keyFromEvent } from "./layout.js";
 import { draw } from "./renderer.js";
 import { loadPersistedState, savePersistedState } from "./storage.js";
 import { randomItem } from "./utils.js";
+import { loadWordLibrary } from "./wordLibrary.js";
 
 export function createGame({ canvas, ctx, elements }) {
   const persisted = loadPersistedState();
@@ -36,55 +46,17 @@ export function createGame({ canvas, ctx, elements }) {
 
   async function init(assets) {
     state.assets = assets;
-    await loadDictionaries();
-    applySettingsToMenu();
-    restoreLastRun();
+    state.dictionaries = await loadWordLibrary();
+    applySettingsToMenu(elements, state);
+    restoreLastRun(state);
     resize();
     updateMenuForScreen();
     elements.startButton.disabled = false;
     elements.startButton.textContent = state.screen === "menu" ? "Start defense" : "Resume defense";
   }
 
-  async function loadDictionaries() {
-    const entries = await Promise.all(
-      Object.entries({ en: "./src/dictionaries/en.json", uk: "./src/dictionaries/uk.json" }).map(
-        async ([language, path]) => [language, await fetch(path).then((res) => res.json())],
-      ),
-    );
-    state.dictionaries = Object.fromEntries(entries);
-  }
-
-  function applySettingsToMenu() {
-    elements.languageSelect.value = state.language;
-    elements.modeSelect.value = state.mode;
-    elements.difficultySelect.value = state.difficulty;
-    elements.targetHighlightInput.checked = state.highlightTarget;
-  }
-
-  function restoreLastRun() {
-    const lastRun = state.persisted.lastRun;
-    if (!lastRun || lastRun.screen === "menu" || lastRun.screen === "gameover") return;
-
-    Object.assign(state, {
-      ...lastRun,
-      screen: "paused",
-      inputQueue: [],
-      particles: [],
-      shots: [],
-      fragments: [],
-      shockwaves: [],
-      pressed: new Map(),
-    });
-  }
-
   function resize() {
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.width = Math.floor(window.innerWidth * dpr);
-    canvas.height = Math.floor(window.innerHeight * dpr);
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    state.keys = buildKeyboard(window.innerWidth, window.innerHeight, state);
+    resizeGame(canvas, ctx, state);
   }
 
   function startGame() {
@@ -255,98 +227,23 @@ export function createGame({ canvas, ctx, elements }) {
       }
     }
 
-    updateTransientEffects(delta);
-  }
-
-  function updateTransientEffects(delta) {
-    state.particles = state.particles
-      .map((particle) => ({
-        ...particle,
-        x: particle.x + particle.vx * delta,
-        y: particle.y + particle.vy * delta,
-        vy: particle.vy + 240 * delta,
-        life: particle.life - delta,
-      }))
-      .filter((particle) => particle.life > 0);
-
-    state.shots = state.shots.map((shot) => ({ ...shot, life: shot.life - delta })).filter((shot) => shot.life > 0);
-
-    state.fragments = state.fragments
-      .map((fragment) => ({
-        ...fragment,
-        x: fragment.x + fragment.vx * delta,
-        y: fragment.y + fragment.vy * delta,
-        vy: fragment.vy + 360 * delta,
-        rotation: fragment.rotation + fragment.spin * delta,
-        life: fragment.life - delta,
-      }))
-      .filter((fragment) => fragment.life > 0);
-
-    state.shockwaves = state.shockwaves
-      .map((shockwave) => ({ ...shockwave, life: shockwave.life - delta }))
-      .filter((shockwave) => shockwave.life > 0);
+    updateTransientEffects(state, delta);
   }
 
   function updateBestScore() {
-    if (state.score <= state.persisted.bestScore) return;
-
-    state.persisted.bestScore = state.score;
-    state.isNewBest = true;
+    updatePersistedBestScore(state);
   }
 
   function ensureStat(key) {
-    if (!state.persisted.stats[key]) state.persisted.stats[key] = { hits: 0, misses: 0 };
-    return state.persisted.stats[key];
+    return ensurePersistedStat(state, key);
   }
 
   function updateMenuForScreen() {
-    const isMenuVisible = state.screen === "menu" || state.screen === "gameover";
-    elements.menu.classList.toggle("is-hidden", !isMenuVisible);
-    elements.menuBackdrop.classList.toggle("is-hidden", !isMenuVisible);
-
-    if (state.screen === "gameover") {
-      elements.menuTitle.textContent = "Game Over";
-      elements.menuResult.textContent = state.isNewBest
-        ? `New best ${state.persisted.bestScore} / Level ${state.level + 1}`
-        : `Score ${state.score} / Best ${state.persisted.bestScore} / Level ${state.level + 1}`;
-      elements.menuResult.classList.toggle("is-record", state.isNewBest);
-      elements.menuResult.classList.remove("is-hidden");
-      elements.startButton.textContent = "Restart defense";
-      return;
-    }
-
-    elements.menuTitle.textContent = "Brainrot Keyboard Defense";
-    elements.menuResult.classList.add("is-hidden");
-    elements.menuResult.classList.remove("is-record");
-    elements.startButton.textContent = state.screen === "paused" ? "Resume defense" : "Start defense";
+    syncMenuForScreen(elements, state);
   }
 
   function persistState() {
-    state.persisted.settings = {
-      language: state.language,
-      mode: state.mode,
-      difficulty: state.difficulty,
-      highlightTarget: state.highlightTarget,
-    };
-    state.persisted.lastRun = createRunSnapshot();
-    savePersistedState(state.persisted);
-  }
-
-  function createRunSnapshot() {
-    return {
-      screen: state.screen,
-      language: state.language,
-      mode: state.mode,
-      difficulty: state.difficulty,
-      highlightTarget: state.highlightTarget,
-      score: state.score,
-      isNewBest: state.isNewBest,
-      hp: state.hp,
-      streak: state.streak,
-      totalHits: state.totalHits,
-      level: state.level,
-      active: state.active,
-    };
+    persistGameState(state);
   }
 
   function handleKeyDown(event) {
@@ -375,12 +272,7 @@ export function createGame({ canvas, ctx, elements }) {
   }
 
   function handleSettingsChange() {
-    state.persisted.settings = {
-      language: elements.languageSelect.value,
-      mode: elements.modeSelect.value,
-      difficulty: elements.difficultySelect.value,
-      highlightTarget: elements.targetHighlightInput.checked,
-    };
+    syncSettingsFromMenu(elements, state);
     savePersistedState(state.persisted);
   }
 
