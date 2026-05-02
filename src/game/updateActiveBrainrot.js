@@ -22,6 +22,11 @@ export function updateActiveBrainrot(context, delta) {
   shatterBrainrot(state, state.active, COLORS.danger);
   burst(state, targetX, target.y, COLORS.danger, 28);
   state.active = null;
+  if (state.hp <= 0) {
+    context.endGame();
+    return;
+  }
+
   state.screen = "hitpause";
   state.resumeAt = performance.now() + 3000;
   context.persistState();

@@ -4,7 +4,7 @@ export function drawStatusOverlay(ctx, state, width, height) {
   if (state.screen !== "paused" && state.screen !== "gameover" && state.screen !== "hitpause") return;
 
   const seconds = Math.ceil(Math.max(0, state.resumeAt - performance.now()) / 1000);
-  const title = state.screen === "paused" ? "Paused" : state.screen === "hitpause" ? "Impact" : "Game Over";
+  const title = state.screen === "paused" ? "Paused" : state.screen === "hitpause" ? "Hit Taken" : "Game Over";
   const subtitle = state.screen === "paused"
     ? "Press Esc to keep defending"
     : state.screen === "hitpause"
