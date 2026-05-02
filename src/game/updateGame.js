@@ -1,5 +1,6 @@
 import { updateActiveBrainrot } from "./updateActiveBrainrot.js";
 import { updatePressedKeys } from "./updatePressedKeys.js";
+import { updateRestartGate } from "./updateRestartGate.js";
 import { updateTransientEffects } from "./updateTransientEffects.js";
 
 export function updateGame(context, delta) {
@@ -8,5 +9,6 @@ export function updateGame(context, delta) {
 
   updatePressedKeys(state, delta);
   updateActiveBrainrot(context, delta);
+  updateRestartGate(context);
   updateTransientEffects(state, delta);
 }

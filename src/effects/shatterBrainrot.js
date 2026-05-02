@@ -1,6 +1,6 @@
 import { COLORS } from "../config.js";
 
-export function shatterBrainrot(state, brainrot) {
+export function shatterBrainrot(state, brainrot, color = COLORS.acid) {
   const cols = 3;
   const rows = 3;
   const pieceSize = brainrot.size / cols;
@@ -10,7 +10,7 @@ export function shatterBrainrot(state, brainrot) {
     y: brainrot.y,
     radius: brainrot.size * 0.24,
     grow: brainrot.size * 1.35,
-    color: COLORS.acid,
+    color,
     life: 0.34,
     maxLife: 0.34,
   });
