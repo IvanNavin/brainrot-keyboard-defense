@@ -2,6 +2,10 @@
 
 Vite + native JavaScript canvas keyboard trainer.
 
+## Demo
+
+GitHub Pages: `https://IvanNavin.github.io/brainrot-keyboard-defense/`
+
 ## Run
 
 ```bash
@@ -9,6 +13,12 @@ npm run dev
 ```
 
 Open `http://localhost:5173`.
+
+## Build
+
+```bash
+npm run build
+```
 
 ## MVP
 
