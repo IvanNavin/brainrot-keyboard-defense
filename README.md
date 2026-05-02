@@ -1,6 +1,6 @@
 # Brainrot Keyboard Defense
 
-Native JavaScript canvas keyboard trainer.
+Vite + native JavaScript canvas keyboard trainer.
 
 ## Run
 
@@ -19,16 +19,20 @@ Open `http://localhost:5173`.
 - Speed increases every 10 successful key presses
 - Classic, Weak keys, and Words modes
 - Persisted app state in `localStorage`: settings, best score, per-key stats, and last run snapshot
-- Word dictionaries in `src/dictionaries/`
+- Vite dev server
+- Local word dictionaries in `src/dictionaries/`, loaded through `wordLibrary` and filtered to 2-4 characters
+- English dictionary currently has 6445 short words; Ukrainian dictionary currently has 275 short words
 
 ## Structure
 
 - `src/main.js` bootstraps DOM, assets, and the game
-- `src/game.js` owns gameplay state and persistence orchestration
-- `src/game/` contains focused one-function game helpers
+- `src/game.js` creates the game context
+- `src/game/` contains one-function game helpers
 - `src/renderer.js` composes canvas rendering
-- `src/render/` contains focused one-function draw helpers
-- `src/layout.js` owns keyboard layouts and physical key mapping
-- `src/effects.js` owns shots, bursts, and shatter effects
-- `src/storage.js` owns localStorage read/write and migration
+- `src/render/` contains one-function draw helpers
+- `src/layout/` contains one-function layout and key mapping helpers
+- `src/effects/` contains one-function shot, burst, and shatter helpers
+- `src/storage/` contains one-function localStorage helpers
+- `src/utils/` contains one-function utility helpers
 - `src/wordLibrary.js` loads dictionary JSON and filters words to 2-4 characters
+- `src/wordLibrary/` contains one-function word-library helpers

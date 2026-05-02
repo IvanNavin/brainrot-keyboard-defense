@@ -1,4 +1,5 @@
-import { LAYOUTS, MAX_WORD_LENGTH } from "./config.js";
+import { LAYOUTS } from "./config.js";
+import { normalizeWords } from "./wordLibrary/normalizeWords.js";
 
 export async function loadWordLibrary() {
   const entries = await Promise.all(
@@ -9,14 +10,4 @@ export async function loadWordLibrary() {
   );
 
   return Object.fromEntries(entries);
-}
-
-function normalizeWords(words) {
-  return [
-    ...new Set(
-      words
-        .map((word) => word.trim().toLowerCase())
-        .filter((word) => word.length > 1 && word.length <= MAX_WORD_LENGTH),
-    ),
-  ];
 }

@@ -1,0 +1,28 @@
+export function createInitialState(persisted, ensureStat) {
+  return {
+    screen: "menu",
+    language: persisted.settings.language,
+    mode: persisted.settings.mode,
+    difficulty: persisted.settings.difficulty,
+    highlightTarget: persisted.settings.highlightTarget,
+    score: 0,
+    isNewBest: false,
+    hp: 3,
+    streak: 0,
+    totalHits: 0,
+    level: 0,
+    active: null,
+    keys: [],
+    inputQueue: [],
+    particles: [],
+    shots: [],
+    fragments: [],
+    shockwaves: [],
+    pressed: new Map(),
+    dictionaries: {},
+    assets: { image: null, frames: [], ready: false },
+    lastTime: performance.now(),
+    persisted,
+    ensureStat,
+  };
+}
