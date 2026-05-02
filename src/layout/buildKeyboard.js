@@ -24,7 +24,7 @@ export function buildKeyboard(width, height, state) {
       y,
       width: keyWidth,
       height: keyHeight,
-      guide: getFingerGuide(index),
+      guide: getFingerGuide(index, id, state.language),
     }));
   });
 }
